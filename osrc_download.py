@@ -54,7 +54,8 @@ for index, row in enumerate(rowSearchTable):
 
     dataList.append({
         "uploadId": sourceUploadId,
-        "downloadPurpose": "AOP"
+        "downloadPurpose": "AOP",
+        "sourceVersion": sourceVersion
     })
 
 # Choose source
@@ -84,7 +85,7 @@ sourceFileName = requestDown.headers["Content-Disposition"].split("=")[1][1:].re
 sourceSize = int(requestDown.headers["Content-Length"])
 
 try:
-    print(f"\nDownloading {sourceFileName} ({sourceVersion}), please do not terminate the script!")
+    print(f"\nDownloading {sourceFileName} ({requestData['sourceVersion']}), please do not terminate the script!")
     progressBar = tqdm(total=sourceSize, unit="B", unit_scale=True)
     with open(sourceFileName, "wb") as file:
         for chunk in requestDown.iter_content(chunk_size=512 * 1024):
