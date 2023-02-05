@@ -31,6 +31,7 @@ downSrcURL = f"{baseURL}/downSrcCode"
 
 # Initialize `requests` session
 session = requests.Session()
+session.verify = False
 
 # Search query
 # Access search page, get available `uploadId`,
