@@ -3,7 +3,7 @@
 # osrc_download - Download a Samsung OSRC source release from Terminal (CLI)
 # Based on work by Simon Shields <simon@lineageos.org> and Tim Zimmermann <tim@linux4.de>
 #
-# Copyright 2022 Hendra Manudinata <saya@hendra-manudinata.my.id>
+# Copyright 2022-2023 Hendra Manudinata <manoedinata@gmail.com>
 # 
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,9 +25,9 @@ from bs4 import BeautifulSoup
 from tqdm import tqdm
 
 baseURL = "https://opensource.samsung.com"
-searchURL = f"{baseURL}/uploadSearch?searchValue="
-modalURL = f"{baseURL}/downSrcMPop?uploadId="
-downSrcURL = f"{baseURL}/downSrcCode"
+searchURL = baseURL + "/uploadSearch?searchValue="
+modalURL = baseURL + "/downSrcMPop?uploadId="
+downSrcURL = baseURL + "/downSrcCode"
 
 # Initialize `requests` session
 session = requests.Session()
@@ -43,7 +43,6 @@ searchTable = parseSearchContent.find_all("table", class_="tbl-downList")
 rowSearchTable = searchTable[0].find_all("tr", class_="")
 
 dataList = []
-global index
 for index, row in enumerate(rowSearchTable):
     dataSearchTable = row.find_all("td")
 
@@ -60,8 +59,9 @@ for index, row in enumerate(rowSearchTable):
     })
 
 # Choose source
-requestDataNum = int(input(f"Select firmware [1 - {index + 1}]: "))
-if len(dataList) >= requestDataNum and requestDataNum >= 1:
+dataLength = len(dataList)
+requestDataNum = int(input(f"Select firmware [1 - {dataLength}]: "))
+if dataLength >= requestDataNum and requestDataNum >= 1:
     requestData = dataList[requestDataNum - 1]
 else:
     print("Invalid choice!")
