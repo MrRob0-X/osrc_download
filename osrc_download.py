@@ -43,40 +43,46 @@ download.add_argument("-v", "--version", help="Source version", required=True)
 args = parser.parse_args()
 model = args.model
 
-# Function: Find dict element of desired source from source version
-def find_source_by_sourcever(dict_target, version):
-    return next((item for i, item in enumerate(dict_target) if item["sourceVersion"] == str(version)), None)
-
 # Initialize `requests` session
 session = requests.Session()
 session.verify = False
 
-# Search query
+# Function: Find dict element of desired source from source version
+def find_source_by_sourcever(dict_target, version):
+    return next((item for i, item in enumerate(dict_target) if item["sourceVersion"] == str(version)), None)
+
+# Function: Search query
 # Access search page, get available `uploadId`,
 # and store it in a dictionary along with `downloadPurpose`
-requestSearch = session.get(searchURL + quote(model))
-parseSearchContent = BeautifulSoup(requestSearch.content, "html.parser")
-searchTable = parseSearchContent.find_all("table", class_="tbl-downList")
-rowSearchTable = searchTable[0].find_all("tr", class_="")
+def search_source(model):
+    requestSearch = session.get(searchURL + quote(model))
+    parseSearchContent = BeautifulSoup(requestSearch.content, "html.parser")
+    searchTable = parseSearchContent.find_all("table", class_="tbl-downList")
+    rowSearchTable = searchTable[0].find_all("tr", class_="")
 
-dataList = []
-for index, row in enumerate(rowSearchTable):
-    dataSearchTable = row.find_all("td")
+    dataList = []
+    for row in rowSearchTable:
+        dataSearchTable = row.find_all("td")
 
-    sourceModel = dataSearchTable[1].text.strip()
-    sourceVersion = dataSearchTable[2].text.strip()
-    sourceUploadId = dataSearchTable[5].find("a")["href"].split("'")[1]
+        sourceModel = dataSearchTable[1].text.strip()
+        sourceVersion = dataSearchTable[2].text.strip()
+        sourceUploadId = dataSearchTable[5].find("a")["href"].split("'")[1]
 
-    dataList.append({
-        "uploadId": sourceUploadId,
-        "downloadPurpose": "AOP",
-        "sourceVersion": sourceVersion,
-        "sourceModel": sourceModel,
-    })
+        dataList.append({
+            "uploadId": sourceUploadId,
+            "downloadPurpose": "AOP",
+            "sourceVersion": sourceVersion,
+            "sourceModel": sourceModel,
+        })
+
+    return dataList
 
 # Command: "search"
 # Do: Print data list
+# JSON or prettier table-like output
 if args.command == "search":
+    dataList = search_source(model)
+
     if args.json:
         print(json.dumps(dataList, indent=4))
     else:
@@ -86,6 +92,7 @@ if args.command == "search":
 # Command: "download"
 # Do: Download the source
 if args.command == "download":
+    dataList = search_source(model)
     selectedSource = find_source_by_sourcever(dataList, args.version)
     if not selectedSource:
         print("Invalid source version: " + args.version)
